@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+lab.db
+.pytest_cache/
+.npm-cache/

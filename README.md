@@ -1,5 +1,105 @@
 # Lab: Build a Database MCP Server with FastMCP and SQLite
 
+## Project Structure
+
+```text
+implementation/
+  db.py              - SQLiteAdapter with safe parameterized queries & validation
+  init_db.py         - Schema creation & seed data for students/courses/enrollments
+  mcp_server.py      - FastMCP server exposing tools & resources
+  verify_server.py   - Standalone verification script (no MCP client needed)
+  start_inspector.bat - Launch MCP Inspector for interactive testing
+  client_config.json - Example MCP client configuration
+  tests/
+    test_server.py   - Pytest test suite (30+ tests)
+```
+
+## Setup
+
+```bash
+# Install dependencies
+pip install fastmcp
+
+# Initialize the database
+python implementation/init_db.py
+
+# Start the server (stdio transport - default for MCP clients)
+python implementation/mcp_server.py
+
+# For SSE/HTTP transport (demo / bonus)
+python implementation/mcp_server.py sse
+```
+
+## Quick Verification
+
+```bash
+# Run standalone verification script
+python implementation/verify_server.py
+
+# Or run pytest test suite
+cd implementation
+pip install pytest
+pytest tests/ -v
+```
+
+## MCP Inspector
+
+```bash
+cd implementation
+./start_inspector.bat
+```
+
+## Client Configuration
+
+### Claude Code (`.mcp.json`)
+```json
+{
+  "mcpServers": {
+    "sqlite-lab": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["/ABSOLUTE/PATH/TO/implementation/mcp_server.py"]
+    }
+  }
+}
+```
+
+### Gemini CLI
+```bash
+gemini mcp add sqlite-lab /path/to/python /path/to/implementation/mcp_server.py --description "SQLite lab MCP server" --timeout 10000
+```
+
+### Codex (`~/.codex/config.toml`)
+```toml
+[mcp_servers.sqlite_lab]
+command = "python"
+args = ["/ABSOLUTE/PATH/TO/implementation/mcp_server.py"]
+```
+
+## Tools
+
+### `search`
+- **Description**: Search rows with filters, ordering, and pagination
+- **Parameters**: `table`, `columns`, `filters`, `limit`, `offset`, `order_by`, `descending`
+- **Example**: Search all students in cohort `A1`
+
+### `insert`
+- **Description**: Insert a new row into a table
+- **Parameters**: `table`, `values`
+- **Example**: Insert a new student record
+
+### `aggregate`
+- **Description**: Compute `count`, `avg`, `sum`, `min`, `max` with optional grouping
+- **Parameters**: `table`, `metric`, `column`, `filters`, `group_by`
+- **Example**: Average score by cohort
+
+## Resources
+
+| URI | Description |
+|-----|-------------|
+| `schema://database` | Full database schema (all tables and columns) |
+| `schema://table/{table_name}` | Schema for a single table |
+
 ## Goal
 
 Build a Model Context Protocol (MCP) server using FastMCP that exposes a small database through:
